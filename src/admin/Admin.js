@@ -35,6 +35,10 @@ const Admin = () => {
         }
       });
       alert(response.data.message);
+      // RESET FORM SETELAH BERHASIL
+      setSelectedFile(null);
+      setSchoolName('');
+      setJurusan('');
     } catch (error) {
       console.error(error);
       alert('Upload gagal!');
@@ -48,12 +52,16 @@ const Admin = () => {
         <NavbarAdmin />
         <Box sx={{ p: 3, mt: 8 }}>
           <Typography variant="h4" gutterBottom>Upload Data Siswa</Typography>
-
           <Box {...getRootProps()} sx={{ border: '2px dashed #ccc', padding: 2, mb: 2, cursor: 'pointer' }}>
             <input {...getInputProps()} />
-            {isDragActive ? <p>Drop the file here ...</p> : <p>Drag 'n' drop file Excel di sini, atau klik untuk pilih file</p>}
+            {selectedFile ? (
+              <p>{selectedFile.name}</p>
+            ) : isDragActive ? (
+              <p>Drop the file here ...</p>
+            ) : (
+              <p>Drag 'n' drop file Excel di sini, atau klik untuk pilih file</p>
+            )}
           </Box>
-
           <TextField
             fullWidth
             label="Nama Sekolah"

@@ -256,10 +256,10 @@ async function startServer() {
           CREATE TABLE IF NOT EXISTS \`${tableName}\` (
             id INT AUTO_INCREMENT PRIMARY KEY,
             nama_siswa VARCHAR(255),
-            ekonomi DECIMAL(4),
-            geografi DECIMAL(4),
-            sejarah DECIMAL(4),
-            sosiologi DECIMAL(4)
+            ekonomi FLOAT(4),
+            geografi FLOAT(4),
+            sejarah FLOAT(4),
+            sosiologi FLOAT(4)
           )
         `);
     
@@ -309,14 +309,19 @@ async function startServer() {
         const [rows] = await db.execute(`
           SELECT 
             nama_siswa,
-            ekonomi,
-            geografi,
-            sejarah,
-            sosiologi,
-            ROUND((ekonomi + geografi + sejarah + sosiologi) / 4, 2) AS rata_rata
+            CAST(ekonomi AS DECIMAL(5,2)) AS ekonomi,
+            CAST(geografi AS DECIMAL(5,2)) AS geografi,
+            CAST(sejarah AS DECIMAL(5,2)) AS sejarah,
+            CAST(sosiologi AS DECIMAL(5,2)) AS sosiologi,
+            ROUND((
+              CAST(ekonomi AS DECIMAL(5,2)) +
+              CAST(geografi AS DECIMAL(5,2)) +
+              CAST(sejarah AS DECIMAL(5,2)) +
+              CAST(sosiologi AS DECIMAL(5,2))
+            ) / 4, 2) AS rata_rata
           FROM \`${tableName}\`
           ORDER BY rata_rata DESC
-        `);
+        `);        
     
         res.json({ data: rows });
       } catch (err) {

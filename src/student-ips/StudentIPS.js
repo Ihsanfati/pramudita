@@ -52,7 +52,9 @@ const StudentIPS = () => {
     rankedData = [...studentData]
       .map(item => ({
         ...item,
-        rata_rata: ((item.ekonomi + item.geografi + item.sejarah + item.sosiologi) / 4).toFixed(2),
+        rata_rata: (
+          (Number(item.ekonomi) + Number(item.geografi) + Number(item.sejarah) + Number(item.sosiologi)) / 4
+        ).toFixed(2),
       }))
       .sort((a, b) => b.rata_rata - a.rata_rata)
       .map((item, index) => ({
