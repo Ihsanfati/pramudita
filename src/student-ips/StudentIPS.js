@@ -95,7 +95,7 @@ const StudentIPS = () => {
       } else {
         return {
           ...commonFields,
-          nilai: item[selectedSubject],
+          nilai: Number(item[selectedSubject]).toFixed(2),
         };
       }
     });
