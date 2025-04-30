@@ -4,12 +4,14 @@ import cors from 'cors';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import xlsx from 'xlsx';
+import fs from "fs";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 const upload = multer({ dest: 'uploads/' });
+const uploadProdi = multer({ dest: "uploads/prodi" });
 
 async function startServer() {
   try {
@@ -327,6 +329,68 @@ async function startServer() {
       } catch (err) {
         console.error('Error fetching all subjects data:', err);
         res.status(500).json({ message: 'Failed to fetch all subjects data.' });
+      }
+    });    
+
+    app.post("/upload-prodi", uploadProdi.single("file"), async (req, res) => {
+      const file = req.file;
+      const year = req.body.year;
+      const tableName = `prodi_${year}`;
+    
+      if (!file || !year) {
+        return res.status(400).json({ message: "File dan tahun wajib diisi." });
+      }
+    
+      try {
+        const workbook = xlsx.readFile(file.path);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = xlsx.utils.sheet_to_json(sheet);
+    
+        const columns = [
+          "Program_Studi VARCHAR(255)",
+          "Universitas VARCHAR(255)",
+          "Jenjang VARCHAR(100)",
+          "Daya_Tampung INT",
+          "Peminat INT",
+          "Jenis_Portofolio VARCHAR(255)",
+          "Jurusan_SMA VARCHAR(3)",
+          "Mata_Pelajaran_Relevan VARCHAR(255)"
+        ];
+    
+        const createTableQuery = `
+          CREATE TABLE IF NOT EXISTS \`${tableName}\` (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            ${columns.join(",")}
+          )
+        `;
+    
+        await db.execute(createTableQuery);
+    
+        const insertQuery = `
+          INSERT INTO \`${tableName}\`
+          (Program_Studi, Universitas, Jenjang, Daya_Tampung, Peminat, Jenis_Portofolio, Jurusan_SMA, Mata_Pelajaran_Relevan)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+    
+        for (const row of jsonData) {
+          await db.execute(insertQuery, [
+            row["Program Studi"] ?? null,
+            row["Universitas"] ?? null,
+            row["Jenjang"] ?? null,
+            row["Daya Tampung"] ?? null,
+            row["Peminat"] ?? null,
+            row["Jenis Portofolio"] ?? null,
+            row["Jurusan SMA"] ?? null,
+            row["Mata Pelajaran yang Relevan"] ?? null
+          ]);          
+        }
+    
+        fs.unlinkSync(file.path); // Hapus file setelah selesai
+        res.json({ message: `Data berhasil diunggah ke tabel ${tableName}` });
+    
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Terjadi kesalahan saat memproses file." });
       }
     });    
 

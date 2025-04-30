@@ -9,6 +9,35 @@ const Admin = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [schoolName, setSchoolName] = useState('');
   const [jurusan, setJurusan] = useState('');
+  const [prodiFile, setProdiFile] = useState(null);
+  const [prodiYear, setProdiYear] = useState("");
+
+  const handleProdiUpload = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("file", prodiFile);
+    formData.append("year", prodiYear);
+
+    try {
+      const res = await fetch("http://localhost:5000/upload-prodi", {
+        method: "POST",
+        body: formData,
+      });
+    
+      if (!res.ok) {
+        const errorText = await res.text(); // optional: untuk debugging
+        throw new Error(`Server error: ${res.status} - ${errorText}`);
+      }
+    
+      const result = await res.json();
+      alert(result.message);
+      setProdiFile(null);
+      setProdiYear('');
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengupload file program studi.");
+    }    
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [], 'application/vnd.ms-excel': [] },
@@ -87,6 +116,28 @@ const Admin = () => {
           <Button variant="contained" color="primary" onClick={handleSubmit}>
             Upload
           </Button>
+        </Box>
+        <Box sx={{ border: '1px solid #ccc', borderRadius: 2, p: 2, mb: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Upload Data Program Studi
+          </Typography>
+          <form onSubmit={handleProdiUpload}>
+            <input type="file" accept=".xlsx" onChange={(e) => setProdiFile(e.target.files[0])} required />
+            <FormControl sx={{ mx: 2, minWidth: 120 }}>
+              <InputLabel>Tahun</InputLabel>
+              <Select
+                value={prodiYear}
+                label="Tahun"
+                onChange={(e) => setProdiYear(e.target.value)}
+                required
+              >
+                <MenuItem value={2024}>2024</MenuItem>
+                <MenuItem value={2025}>2025</MenuItem>
+                <MenuItem value={2026}>2026</MenuItem>
+              </Select>
+            </FormControl>
+            <Button type="submit" variant="contained">Upload</Button>
+          </form>
         </Box>
       </Box>
     </Box>
