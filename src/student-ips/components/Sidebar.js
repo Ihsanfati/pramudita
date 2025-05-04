@@ -35,7 +35,7 @@ const Sidebar = ({ onSubjectClick }) => {
       <Toolbar />
       <Box sx={{ overflow: 'auto', p: 2 }}>
         <Typography variant="subtitle2" sx={{ mt: 2 }}>
-          Rangking Mata Pelajaran
+          Rangking Mata Pelajaran dan Opsi Program Studi
         </Typography>
         <List>
           {subjects.map((text) => (
@@ -50,17 +50,6 @@ const Sidebar = ({ onSubjectClick }) => {
           </ListItem>
         </List>
         <Divider />
-        <Typography variant="subtitle2" sx={{ mt: 2 }}>
-          Opsi Program Studi
-        </Typography>
-        <List>
-          {subjects.map((text) => (
-            <ListItem button key={text} onClick={() => onSubjectClick(text)}>
-              {iconMap[text]}
-              <ListItemText primary={text} sx={{ pl: 2 }} />
-            </ListItem>
-          ))}
-        </List>
       </Box>
     </Drawer>
   );
