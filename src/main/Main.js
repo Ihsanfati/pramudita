@@ -8,6 +8,7 @@ import SearchEngine from '../search-engine/SearchEngine'
 import StudentIPS from '../student-ips/StudentIPS';
 import StudentIPA from '../student-ipa/StudentIPA';
 import Admin from '../admin/Admin'
+import ProgramStudiList from "../student-ips/program-studi-list-ips/ProgramStudiList";
 
 import {
   Routes,
@@ -26,6 +27,7 @@ export default function Main(props) {
           <Route path="/student-ips" element={<StudentIPS />} />
           <Route path="/student-ipa" element={<StudentIPA />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/student-ips/program-studi-list-ips" element={<ProgramStudiList />} />
         </Routes>
     </AppTheme>
   );

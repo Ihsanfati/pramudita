@@ -394,6 +394,17 @@ async function startServer() {
       }
     });    
 
+    app.get('/api/program-studi/:subject', async (req, res) => {
+      const { subject } = req.params;
+      const [rows] = await connection.execute(`
+        SELECT Program_Studi, Universitas, Jenjang, Daya_Tampung, Peminat, Jenis_Portofolio
+        FROM prodi_2025
+        WHERE Jurusan_SMA = 'IPS' AND FIND_IN_SET(?, Mata_Pelajaran_Relevan)
+      `, [subject]);
+    
+      res.json(rows);
+    });
+    
     app.listen(5000, () => {
       console.log('Server running on http://localhost:5000');
     });

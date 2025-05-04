@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
+import ProgramStudiList from "./program-studi-list-ips/ProgramStudiList";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button, Box, Typography, Paper, InputBase, Select, MenuItem, FormControl, TableContainer } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChartBar, faGraduationCap } from '@fortawesome/free-solid-svg-icons';
 import { DataGrid } from '@mui/x-data-grid';
@@ -15,20 +16,30 @@ const StudentIPS = () => {
   const { user } = location.state || {};
 
   const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedMenu, setSelectedMenu] = useState('rank');
   const [studentData, setStudentData] = useState([]);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
+  const navigate = useNavigate();
 
-  const handleSubjectClick = async (subject) => {
+  const handleSubjectClick = async (subject, menuType) => {
+    setSelectedSubject(subject);
+    setSelectedMenu(menuType);
+
     if (!user) return;
     const tableName = (user.asal_sekolah + '_' + user.jurusan).toLowerCase().replace(/\s+/g, '_');
-
-    let endpoint = 'http://localhost:5000/api/get-subject-data';
+    
+    let endpoint = '';
     let body = { tableName, subject };
 
-    if (subject === 'All') {
-      endpoint = 'http://localhost:5000/api/get-all-subjects-data-ips';
+    if (menuType === 'rank') {
+      endpoint = 'http://localhost:5000/api/get-subject-data';
+      if (subject === 'All') {
+        endpoint = 'http://localhost:5000/api/get-all-subjects-data-ips';
+      }
+    } else if (menuType === 'prodi') {
+      navigate('program-studi-list-ips', { state: { user, subject } });
     }
 
     try {
@@ -122,14 +133,18 @@ const StudentIPS = () => {
       <Box sx={{ flexGrow: 1 }}>
         <Navbar />
         <Box sx={{ p: 3, mt: 8, bgcolor: '#f0f0f0', minHeight: '100vh' }}>
-          <Typography variant="h5" fontWeight="bold" align="center" sx={{ mb: 1 }}>
-            <FontAwesomeIcon icon={faGraduationCap} style={{ marginRight: 8 }} />
-            Selamat Datang di Dashboard IPS
-          </Typography>
-          <Typography variant="body1" align="center" sx={{ mb: 4 }}>
-            Silakan pilih mata pelajaran atau opsi studi di sidebar kiri.
-          </Typography>
-
+          {selectedMenu === 'rank' ? ( // Cek apakah menu yang dipilih adalah ranking
+            <Typography variant="h5" fontWeight="bold" align="center">
+              Menampilkan Ranking Mata Pelajaran: {selectedSubject}
+              {/* Render Ranking Data here */}
+            </Typography>
+          ) : selectedMenu === 'prodi' ? ( // Jika menu yang dipilih adalah Program Studi
+            <ProgramStudiList subject={selectedSubject} /> // Render ProgramStudiList
+          ) : (
+            <Typography variant="h5" fontWeight="bold" align="center">
+              Silakan pilih mata pelajaran atau opsi studi di sidebar kiri.
+            </Typography>
+          )}
           {selectedSubject && (
             <Box>
               <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
