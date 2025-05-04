@@ -175,7 +175,7 @@ export default function SignUp(props) {
       const result = await res.json();
       if (res.ok) {
         alert('Account created successfully!');
-        navigate('/sign-in');
+        navigate('/');
       } else {
         alert(result.message || 'Signup failed.');
       }
@@ -311,7 +311,7 @@ export default function SignUp(props) {
             <Typography 
               sx={{ textAlign: 'center' }}
               component={RouterLink}
-              to="/sign-in"
+              to="/"
             >
               Already have an account? Sign in
             </Typography>
