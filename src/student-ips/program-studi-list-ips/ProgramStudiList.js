@@ -12,7 +12,7 @@ import { DataGrid } from '@mui/x-data-grid';
 
 const ProgramStudiList = () => {
   const location = useLocation();
-  const { user } = location.state || {};
+  const { user, subject } = location.state || {};
   const navigate = useNavigate();
 
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -30,13 +30,13 @@ const ProgramStudiList = () => {
     if (menuType === 'prodi') {
       try {
         const res = await fetch(`http://localhost:5000/api/program-studi/${subject}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tableName, subject }),
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
         });
 
         const result = await res.json();
-        setProgramStudiData(result.data);
+        const dataArray = result.data || [];
+        setProgramStudiData(dataArray);
         setCurrentPage(0);
       } catch (error) {
         console.error('Failed to fetch program studi data:', error);

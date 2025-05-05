@@ -39,7 +39,7 @@ const StudentIPS = () => {
         endpoint = 'http://localhost:5000/api/get-all-subjects-data-ips';
       }
     } else if (menuType === 'prodi') {
-      navigate('program-studi-list-ips', { state: { user, subject } });
+      navigate('/student-ips/program-studi-list-ips', { state: { user, subject } });
     }
 
     try {
@@ -133,18 +133,10 @@ const StudentIPS = () => {
       <Box sx={{ flexGrow: 1 }}>
         <Navbar />
         <Box sx={{ p: 3, mt: 8, bgcolor: '#f0f0f0', minHeight: '100vh' }}>
-          {selectedMenu === 'rank' ? ( // Cek apakah menu yang dipilih adalah ranking
             <Typography variant="h5" fontWeight="bold" align="center">
               Menampilkan Ranking Mata Pelajaran: {selectedSubject}
               {/* Render Ranking Data here */}
             </Typography>
-          ) : selectedMenu === 'prodi' ? ( // Jika menu yang dipilih adalah Program Studi
-            <ProgramStudiList subject={selectedSubject} /> // Render ProgramStudiList
-          ) : (
-            <Typography variant="h5" fontWeight="bold" align="center">
-              Silakan pilih mata pelajaran atau opsi studi di sidebar kiri.
-            </Typography>
-          )}
           {selectedSubject && (
             <Box>
               <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
