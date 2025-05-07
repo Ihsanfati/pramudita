@@ -1,5 +1,5 @@
 // ProgramStudiList.js (refactored)
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -20,6 +20,12 @@ const ProgramStudiList = () => {
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
+
+  useEffect(() => {
+    if (subject && !selectedSubject) {
+      handleSubjectClick(subject, 'prodi');
+    }
+  }, [subject, selectedSubject]); // depend on subject dan selectedSubject
 
   const handleSubjectClick = async (subject, menuType) => {
     setSelectedSubject(subject);
@@ -130,17 +136,81 @@ const ProgramStudiList = () => {
                   Previous
                 </Button>
 
-                {Array.from({ length: Math.ceil(filteredData.length / pageSize) }).map((_, index) => (
-                  <Button
-                    key={index}
-                    variant={index === currentPage ? 'contained' : 'outlined'}
-                    size="small"
-                    onClick={() => setCurrentPage(index)}
-                    sx={{ mx: 0.5, minWidth: 36 }}
-                  >
-                    {index + 1}
-                  </Button>
-                ))}
+                {(() => {
+                  const totalPages = Math.ceil(filteredData.length / pageSize);
+                  const pageButtons = [];
+                  const maxButtons = 5; // jumlah tombol yang tampil (boleh atur)
+
+                  if (totalPages <= maxButtons + 2) {
+                    // tampilkan semua kalau total sedikit
+                    for (let i = 0; i < totalPages; i++) {
+                      pageButtons.push(
+                        <Button
+                          key={i}
+                          variant={i === currentPage ? 'contained' : 'outlined'}
+                          size="small"
+                          onClick={() => setCurrentPage(i)}
+                          sx={{ mx: 0.5, minWidth: 36 }}
+                        >
+                          {i + 1}
+                        </Button>
+                      );
+                    }
+                  } else {
+                    // tampilkan dinamis
+                    if (currentPage > 1) {
+                      pageButtons.push(
+                        <Button
+                          key={0}
+                          variant={currentPage === 0 ? 'contained' : 'outlined'}
+                          size="small"
+                          onClick={() => setCurrentPage(0)}
+                          sx={{ mx: 0.5, minWidth: 36 }}
+                        >
+                          1
+                        </Button>
+                      );
+                      if (currentPage > 2) {
+                        pageButtons.push(<Typography key="start-ellipsis" sx={{ mx: 1 }}>...</Typography>);
+                      }
+                    }
+
+                    const startPage = Math.max(1, currentPage - 1);
+                    const endPage = Math.min(totalPages - 2, currentPage + 1);
+
+                    for (let i = startPage; i <= endPage; i++) {
+                      pageButtons.push(
+                        <Button
+                          key={i}
+                          variant={i === currentPage ? 'contained' : 'outlined'}
+                          size="small"
+                          onClick={() => setCurrentPage(i)}
+                          sx={{ mx: 0.5, minWidth: 36 }}
+                        >
+                          {i + 1}
+                        </Button>
+                      );
+                    }
+
+                    if (currentPage < totalPages - 3) {
+                      pageButtons.push(<Typography key="end-ellipsis" sx={{ mx: 1 }}>...</Typography>);
+                    }
+
+                    pageButtons.push(
+                      <Button
+                        key={totalPages - 1}
+                        variant={currentPage === totalPages - 1 ? 'contained' : 'outlined'}
+                        size="small"
+                        onClick={() => setCurrentPage(totalPages - 1)}
+                        sx={{ mx: 0.5, minWidth: 36 }}
+                      >
+                        {totalPages}
+                      </Button>
+                    );
+                  }
+
+                  return pageButtons;
+                })()}
 
                 <Button
                   variant="contained"
