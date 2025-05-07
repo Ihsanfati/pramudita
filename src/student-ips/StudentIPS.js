@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import ProgramStudiList from "./program-studi-list-ips/ProgramStudiList";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button, Box, Typography, Paper, InputBase, Select, MenuItem, FormControl, TableContainer } from '@mui/material';

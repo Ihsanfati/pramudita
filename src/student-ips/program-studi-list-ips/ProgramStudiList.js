@@ -6,8 +6,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button, Box, Typography, Paper, InputBase, Select, MenuItem, FormControl, TableContainer } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChartBar } from '@fortawesome/free-solid-svg-icons';
 import { DataGrid } from '@mui/x-data-grid';
 
 const ProgramStudiList = () => {
