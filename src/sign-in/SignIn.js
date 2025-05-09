@@ -147,26 +147,14 @@ export default function SignIn(props) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(userData),
       });
   
       const result = await res.json();
       const user = result.user;
-      sessionStorage.setItem('user', JSON.stringify(user)); // SIMPAN DATA USER
       alert(JSON.stringify(user, null, 2));
   
-      //if (res.ok) {
-        //alert('Account signin successfully!');
-        // Logika pengalihan berdasarkan username dan jurusan
-        //if (user.username === 'admin') {
-          //navigate('/admin');
-        //} else if (user.jurusan && user.jurusan.toUpperCase() === 'BK') {
-          //navigate('/search-engine');
-        //} else {
-          //navigate('/student');
-        //}
-        //}
-        // Logika pengalihan berdasarkan username dan jurusan
       switch (true) {
         case user.username === 'admin':
           navigate('/admin');

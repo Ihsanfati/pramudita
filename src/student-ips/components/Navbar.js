@@ -1,13 +1,20 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Avatar, Menu, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function Navbar() {
+  const [user, setUser] = React.useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/user-info', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setUser(data.user))
+      .catch(() => setUser(null));
+  }, []);
+
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
-
-  // Ambil user dari sessionStorage
-  const user = JSON.parse(sessionStorage.getItem('user'));
 
   const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -17,8 +24,11 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    sessionStorage.clear(); // hapus data user
+  const handleLogout = async () => {
+    await fetch('http://localhost:5000/api/logout', {
+      method: 'POST',
+      credentials: 'include', // kirim cookie ke backend
+    });
     handleClose();
     navigate('/');
   };

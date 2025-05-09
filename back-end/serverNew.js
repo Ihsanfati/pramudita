@@ -5,13 +5,36 @@ import bcrypt from 'bcrypt';
 import multer from 'multer';
 import xlsx from 'xlsx';
 import fs from "fs";
+import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken'
 
 const app = express();
-
-app.use(cors());
-app.use(express.json());
 const upload = multer({ dest: 'uploads/' });
 const uploadProdi = multer({ dest: "uploads/prodi" });
+const JWT_SECRET = 'Pr4mud1Ta_0Tw_1M';
+
+app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:3000', 
+  credentials: true 
+}));
+app.use(express.json());
+
+// Middleware verifikasi JWT
+function verifyToken(req, res, next) {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized: No token provided' });
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    console.log('Token verification failed:', err);
+    return res.status(403).json({ message: 'Invalid or expired token' });
+  }
+}
 
 async function startServer() {
   try {
@@ -90,68 +113,41 @@ async function startServer() {
 
     app.post('/api/signin', async (req, res) => {
       const { email, password, jurusanLogin } = req.body;
-
-      if (!email || !password || !jurusanLogin) {
-        return res.status(400).json({ message: 'Email, password, and jurusan are required.' });
-      }
-
-      if (jurusanLogin == 'ipa' || jurusanLogin == 'ips') {
-        try {
-          const [rows] = await db.execute('SELECT id_siswa, nama_lengkap, username, email, password, asal_sekolah, jurusan FROM users WHERE email = ? AND jurusan = ?', [email, jurusanLogin]);
-
-          if (rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
-          }
-
-          const user = rows[0];
-          const passwordMatch = await bcrypt.compare(password, user.password);
-
-          if (!passwordMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-          } else {
-            res.status(200).json({ message: 'Successfully logged in', user: { 
-              id: user.id, 
-              fullname: user.nama_lengkap,
-              username: user.username, 
-              email: user.email,
-              asal_sekolah: user.asal_sekolah,
-              jurusan: user.jurusan 
-            } });
-            console.log(user)
-          }
-        } catch (err) {
-          console.error('Signin error:', err);
-          res.status(500).json({ message: 'Internal server error' });
+      try {
+        let user;
+        if (jurusanLogin === 'ipa' || jurusanLogin === 'ips') {
+          const [rows] = await db.execute('SELECT * FROM users WHERE email = ? AND jurusan = ?', [email, jurusanLogin]);
+          if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+          user = rows[0];
+        } else if (jurusanLogin === 'bk') {
+          const [rows] = await db.execute('SELECT * FROM bk WHERE email = ?', [email]);
+          if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+          user = rows[0];
+        } else {
+          return res.status(400).json({ message: 'Invalid jurusanLogin' });
         }
-      }
 
-      if (jurusanLogin == 'bk') {
-        try {
-          const [rows] = await db.execute('SELECT id_bk, nama_lengkap, username, email, password, asal_sekolah FROM bk WHERE email = ?', [email]);
-
-          if (rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
-          }
-
-          const user = rows[0];
-          const passwordMatch = await bcrypt.compare(password, user.password);
-
-          if (!passwordMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-          } else {
-            res.status(200).json({ message: 'Successfully logged in', user: { 
-              id: user.id, 
-              fullname: user.nama_lengkap,
-              username: user.username, 
-              email: user.email,
-              asal_sekolah: user.asal_sekolah
-            } });
-            console.log(user)
-          }
-        } catch (err) {
-          console.error('Signin error:', err);
-          res.status(500).json({ message: 'Internal server error' });
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+          return res.status(401).json({ message: 'Invalid credentials' });
         }
+
+        const payload = {
+          id: jurusanLogin === 'bk' ? user.id_bk : user.id_siswa,
+          name: user.nama_lengkap,
+          username: user.username,
+          email: user.email,
+          asal_sekolah: user.asal_sekolah,
+          jurusan: user.jurusan,
+        };
+
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
+        res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+
+        res.status(200).json({ message: 'Successfully logged in', user: payload });
+      } catch (err) {
+        console.error('Signin error:', err);
+        res.status(500).json({ message: 'Internal server error' });
       }
     });
 
@@ -409,6 +405,28 @@ async function startServer() {
           res.status(500).json({ error: 'Failed to fetch program studi', details: error.message });
       }
     });  
+
+    app.get('/verify-token', (req, res) => {
+      const token = req.cookies.token;
+      if (!token) {
+        return res.status(401).json({ valid: false });
+      }
+      jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).json({ valid: false });
+        }
+        return res.json({ valid: true, username: decoded.username });
+      });
+    });
+
+    app.get('/api/me', verifyToken, (req, res) => {
+      res.status(200).json({ user: req.user });
+    });
+
+    app.post('/api/logout', (req, res) => {
+      res.clearCookie('token', { httpOnly: true, sameSite: 'strict' });
+      res.json({ success: true });
+    });
     
     app.listen(5000, () => {
       console.log('Server running on http://localhost:5000');
