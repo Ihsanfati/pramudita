@@ -136,7 +136,7 @@ const StudentIPS = () => {
     <Box sx={{ display: 'flex' }}>
       <Sidebar onSubjectClick={handleSubjectClick} />
       <Box sx={{ flexGrow: 1 }}>
-        <Navbar />
+        <Navbar user={user}/>
         <Box sx={{ p: 3, mt: 8, bgcolor: '#f0f0f0', minHeight: '100vh' }}>
             <Typography variant="h5" fontWeight="bold" align="center">
               Menampilkan Ranking Mata Pelajaran: {selectedSubject}

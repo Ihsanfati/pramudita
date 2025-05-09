@@ -1,17 +1,16 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Avatar, Menu, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-export default function Navbar() {
-  const [user, setUser] = React.useState(null);
+export default function Navbar({ user: initialUser }) {
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/user-info', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setUser(data.user))
-      .catch(() => setUser(null));
-  }, []);
+    if (initialUser) {
+      setUser(initialUser); // update state jika prop berubah
+    }
+  }, [initialUser]);
 
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
