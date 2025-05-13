@@ -160,7 +160,7 @@ export default function SignIn(props) {
           navigate('/admin');
           break;
         case user.jurusan && user.jurusan.toUpperCase() === 'BK':
-          navigate('/search-engine');
+          navigate('/bk', { state: { user } });
           break;
           case user.jurusan && user.jurusan.toUpperCase() === 'IPS':
             navigate('/student-ips', { state: { user } });

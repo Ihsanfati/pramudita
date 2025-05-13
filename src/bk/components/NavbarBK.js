@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, IconButton, Avatar, Menu, MenuItem } from 
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
-export default function Navbar({ user: initialUser }) {
+export default function NavbarBK ({ user: initialUser }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -54,10 +54,8 @@ export default function Navbar({ user: initialUser }) {
             horizontal: 'right',
           }}
         >
-          <MenuItem disabled>Nama Lengkap: <strong>{user?.name}</strong></MenuItem>
           <MenuItem disabled><strong>{user?.username}</strong></MenuItem>
           <MenuItem disabled>Asal: {user?.asal_sekolah}</MenuItem>
-          <MenuItem disabled>Jurusan: {user?.jurusan}</MenuItem>
           <MenuItem onClick={handleLogout} sx={{ color: 'red' }}>
             Logout
           </MenuItem>

@@ -427,6 +427,73 @@ async function startServer() {
       res.clearCookie('token', { httpOnly: true, sameSite: 'strict' });
       res.json({ success: true });
     });
+
+    app.post('/api/pilihan-snmptn', async (req, res) => {
+      const { nama_lengkap, universitas, program_studi, pilihan, asal_sekolah, jurusan } = req.body;
+      console.log(nama_lengkap);
+      console.log(universitas);
+      console.log(program_studi);
+      console.log(pilihan);
+      console.log(asal_sekolah);
+      console.log(jurusan);
+      const tableName = `snmptn_${asal_sekolah.toLowerCase()}_${jurusan.toLowerCase()}`;
+      try {
+        const [create] = await db.query(`
+          CREATE TABLE IF NOT EXISTS \`${tableName}\` (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nama_lengkap VARCHAR(100),
+            universitas VARCHAR(150),
+            program_studi VARCHAR(150),
+            pilihan VARCHAR(20)
+          )
+        `);
+
+        await db.query(`
+          INSERT INTO \`${tableName}\` (nama_lengkap, universitas, program_studi, pilihan)
+          VALUES (?, ?, ?, ?)
+        `, [nama_lengkap, universitas, program_studi, pilihan]);
+        res.json({ message: 'Pilihan SNMPTN berhasil disimpan.' });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Gagal menyimpan pilihan SNMPTN' });
+      }
+    });
+
+    app.get('/api/data-pilihan', async (req, res) => {
+      const { asal_sekolah, jurusan, pilihan } = req.query;
+      const tablePilihan = `snmptn_${asal_sekolah.toLowerCase()}_${jurusan.toLowerCase()}`;
+      const tableNilai = `${asal_sekolah.toLowerCase()}_${jurusan.toLowerCase()}`;
+
+      try {
+        const [data] = await db.query(`
+          SELECT 
+            s.nama_lengkap, 
+            s.pilihan, 
+            s.universitas, 
+            s.program_studi,
+            (
+              SELECT COUNT(*) + 1 FROM (
+                SELECT nama_siswa, 
+                  (COALESCE(ekonomi, 0) + COALESCE(geografi, 0) + COALESCE(sejarah, 0) + COALESCE(sosiologi, 0)) / 4 AS rata2
+                FROM \`${tableNilai}\`
+              ) AS sub
+              WHERE sub.rata2 > (
+                SELECT 
+                  (COALESCE(ekonomi, 0) + COALESCE(geografi, 0) + COALESCE(sejarah, 0) + COALESCE(sosiologi, 0)) / 4
+                FROM \`${tableNilai}\` 
+                WHERE nama_siswa = s.nama_lengkap
+              )
+            ) AS ranking_paralel
+          FROM \`${tablePilihan}\` s
+          WHERE s.pilihan = ?
+        `, [pilihan]);
+
+        res.json(data);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Gagal mengambil data pilihan SNMPTN' });
+      }
+    });
     
     app.listen(5000, () => {
       console.log('Server running on http://localhost:5000');

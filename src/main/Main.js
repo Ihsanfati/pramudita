@@ -9,6 +9,7 @@ import StudentIPS from '../student-ips/StudentIPS';
 import StudentIPA from '../student-ipa/StudentIPA';
 import Admin from '../admin/Admin'
 import ProgramStudiList from "../student-ips/program-studi-list-ips/ProgramStudiList";
+import BK from '../bk/BK';
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
@@ -57,6 +58,7 @@ export default function Main(props) {
           <Route path="/student-ipa" element={<RequireAuth><StudentIPA /></RequireAuth>} />
           <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
           <Route path="/student-ips/program-studi-list-ips" element={<RequireAuth><ProgramStudiList /></RequireAuth>} />
+          <Route path="/bk" element={<RequireAuth><BK /></RequireAuth>} />
         </Routes>
     </AppTheme>
   );

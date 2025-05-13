@@ -29,7 +29,6 @@ const ProgramStudiList = () => {
     setSelectedSubject(subject);
 
     if (!user) return;
-    const tableName = (user.asal_sekolah + '_' + user.jurusan).toLowerCase().replace(/\s+/g, '_');
 
     if (menuType === 'prodi') {
       try {
@@ -47,6 +46,31 @@ const ProgramStudiList = () => {
       }
     } else if (menuType === 'rank' || menuType === 'All') {
       navigate('/student-ips', { state: { user, subject } });
+    }
+  };
+
+  const handleChoose = async (rowData, pilihan) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/pilihan-snmptn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          nama_lengkap: user.name,
+          universitas: rowData.Universitas,
+          program_studi: rowData.Program_Studi,
+          pilihan,
+          asal_sekolah: user.asal_sekolah,
+          jurusan: user.jurusan,
+        }),
+      });
+      if (response.ok) {
+        alert('Pilihan berhasil disimpan');
+      } else {
+        alert('Gagal menyimpan pilihan');
+      }
+    } catch (error) {
+      console.error('Gagal:', error);
     }
   };
 
@@ -68,6 +92,34 @@ const ProgramStudiList = () => {
     { field: 'Daya_Tampung', headerName: 'Daya Tampung', width: 120 },
     { field: 'Peminat', headerName: 'Peminat', width: 120 },
     { field: 'Jenis_Portofolio', headerName: 'Jenis Portofolio', width: 150 },
+    {
+      field: 'actions',
+      headerName: 'Pilih',
+      flex: 1,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Box>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            sx={{ mr: 1 }}
+            onClick={() => handleChoose(params.row, 'Pilihan 1')}
+          >
+            Pilihan 1
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleChoose(params.row, 'Pilihan 2')}
+          >
+            Pilihan 2
+          </Button>
+        </Box>
+      ),
+    },
   ];
 
   return (
@@ -114,14 +166,12 @@ const ProgramStudiList = () => {
               hideFooter
               disableColumnMenu
             />
-
             <Box sx={{ mt: 2, px: 2, py: 1, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
               <Typography variant="body2">
                 Showing {filteredData.length === 0 ? 0 : currentPage * pageSize + 1}
                 {" "}to{" "}
                 {Math.min((currentPage + 1) * pageSize, filteredData.length)} of {filteredData.length} entries
               </Typography>
-
               <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
                 <Button
                   variant="contained"
@@ -133,7 +183,6 @@ const ProgramStudiList = () => {
                 >
                   Previous
                 </Button>
-
                 {(() => {
                   const totalPages = Math.ceil(filteredData.length / pageSize);
                   const pageButtons = [];
@@ -209,7 +258,6 @@ const ProgramStudiList = () => {
 
                   return pageButtons;
                 })()}
-
                 <Button
                   variant="contained"
                   size="small"
